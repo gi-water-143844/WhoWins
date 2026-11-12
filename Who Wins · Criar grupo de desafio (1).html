@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Who Wins · Criar grupo de desafio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;800&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+  --bg:#F4F1FB;--surface:#fff;--ink:#231942;--muted:#5B5678;--line:#D9D2EC;
+  --primary:#6D28D9;--primary-ink:#fff;--accent:#FFB703;--err:#B3261E;--err-bg:#FDECEA;--ok-bg:#EDE7FB;
+  --head:"Bricolage Grotesque","Trebuchet MS",sans-serif;--body:"Instrument Sans","Segoe UI",system-ui,sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){color-scheme:dark;
+  --bg:#150F26;--surface:#20173A;--ink:#F1ECFF;--muted:#B7AEDB;--line:#3D3262;--primary:#A78BFA;--primary-ink:#1A0B3D;--accent:#FFC93C;--err:#FF8A80;--err-bg:#3A1F24;--ok-bg:#2B1F52}}
+:root[data-theme="dark"]{color-scheme:dark;
+  --bg:#150F26;--surface:#20173A;--ink:#F1ECFF;--muted:#B7AEDB;--line:#3D3262;--primary:#A78BFA;--primary-ink:#1A0B3D;--accent:#FFC93C;--err:#FF8A80;--err-bg:#3A1F24;--ok-bg:#2B1F52}
+html{height:100%;scroll-padding-top:env(safe-area-inset-top,0px)}
+*,*::before,*::after{box-sizing:inherit}
+body{margin:0;background:linear-gradient(180deg,color-mix(in srgb,var(--primary) 16%,var(--bg)) 0,var(--bg) 20rem) no-repeat,var(--bg);color:var(--ink);font:400 1rem/1.5 var(--body)}
+.wrap{max-width:46rem;margin:0 auto;padding:1.5rem 1rem 3rem}
+header.top{display:flex;align-items:center;gap:.7rem;margin-bottom:1.5rem;font:800 1.35rem var(--head);letter-spacing:-.01em}
+header.top svg{width:2.6rem;height:2.6rem;flex:none;filter:drop-shadow(0 4px 8px color-mix(in srgb,var(--primary) 40%,transparent))}
+h1{font:800 clamp(1.75rem,5vw,2.4rem)/1.1 var(--head);margin:0 0 .4rem}
+.lead{color:var(--muted);margin:0 0 1.5rem;max-width:60ch}
+fieldset{border:1px solid var(--line);background:var(--surface);border-radius:14px;padding:1.1rem 1.1rem 1.25rem;margin:0 0 1rem;min-width:0}
+legend{font:600 1.05rem var(--head);padding:0 .4rem;color:var(--primary)}
+.field{margin-top:1rem}.field:first-of-type{margin-top:.25rem}
+label,.lbl{display:block;font-weight:600;margin-bottom:.25rem}
+.opt{font-weight:400;color:var(--muted)}
+.hint{color:var(--muted);font-size:.9rem;margin:.15rem 0 .4rem}
+input[type=text],input[type=number],select,textarea{width:100%;font:inherit;color:var(--ink);background:var(--bg);border:1.5px solid var(--line);border-radius:10px;padding:.65rem .75rem;min-height:2.75rem}
+textarea{resize:vertical;min-height:5rem}
+:is(input,select,textarea,button):focus-visible,.vis input:focus-visible+.card{outline:3px solid var(--accent);outline-offset:2px}
+[aria-invalid=true]{border-color:var(--err);background:var(--err-bg)}
+.error{color:var(--err);font-size:.9rem;font-weight:500;margin:.35rem 0 0}
+.error:empty{display:none}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:.75rem}
+@media(max-width:34rem){.row{grid-template-columns:1fr}}
+.vis{display:grid;grid-template-columns:1fr 1fr;gap:.75rem}
+@media(max-width:34rem){.vis{grid-template-columns:1fr}}
+.vis label{position:relative;margin:0;font-weight:400}
+.vis input{position:absolute;opacity:0;inset:0;width:100%;height:100%;margin:0;cursor:pointer}
+.vis .card{display:block;height:100%;border:2px solid var(--line);border-radius:12px;padding:.85rem;background:var(--bg)}
+.vis input:checked+.card{border-color:var(--primary);background:var(--ok-bg)}
+.card b{display:block;font:600 1rem var(--head)}
+.card small{color:var(--muted)}
+.actions{display:flex;gap:.75rem;justify-content:flex-end;flex-wrap:wrap;margin-top:1.25rem}
+button{font:600 1rem var(--body);min-height:2.9rem;padding:.6rem 1.3rem;border-radius:10px;cursor:pointer;border:2px solid transparent}
+.primary{background:var(--primary);color:var(--primary-ink);box-shadow:0 4px 14px color-mix(in srgb,var(--primary) 35%,transparent)}
+.primary:disabled{opacity:.7;cursor:progress}
+.secondary{background:transparent;color:var(--ink);border-color:var(--line)}
+.banner{border-radius:10px;padding:.8rem 1rem;margin-bottom:1rem;font-weight:500}
+.banner.err{background:var(--err-bg);color:var(--err);border:1px solid var(--err)}
+.banner.info{background:var(--surface);border:1px dashed var(--line);color:var(--muted);font-weight:400;font-size:.9rem}
+.success{background:var(--surface);border:2px solid var(--primary);border-radius:14px;padding:1.5rem}
+.success h2{font:800 1.5rem var(--head);margin:0 0 .5rem}
+.success dl{display:grid;grid-template-columns:max-content 1fr;gap:.35rem 1rem;margin:1rem 0}
+.success dt{color:var(--muted)}.success dd{margin:0;overflow-wrap:anywhere}
+.spin{display:inline-block;width:1em;height:1em;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;vertical-align:-.15em;margin-right:.5rem;animation:r .7s linear infinite}
+@keyframes r{to{transform:rotate(360deg)}}
+@media(prefers-reduced-motion:reduce){.spin{animation-duration:2s}}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top"><svg viewBox="0 0 48 48" role="img" aria-label="Logo Who Wins"><defs><linearGradient id="lg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#8B5CF6"/><stop offset="1" stop-color="#4C1D95"/></linearGradient></defs><rect width="48" height="48" rx="13" fill="url(#lg)"/><path d="M24 6.5l2.6 5.3 5.8.8-4.2 4.1 1 5.8L24 19.7l-5.2 2.8 1-5.8-4.2-4.1 5.8-.8z" fill="#FFB703"/><rect x="9" y="31" width="9" height="9" rx="2" fill="#fff" opacity=".75"/><rect x="19.5" y="25" width="9" height="15" rx="2" fill="#fff"/><rect x="30" y="34" width="9" height="6" rx="2" fill="#fff" opacity=".6"/></svg>Who Wins</header>
+  <main id="app">
+    <section id="formView">
+      <h1>Criar grupo de desafio</h1>
+      <p class="lead">Defina o hábito, o período e como os pontos serão contados. Depois é só convidar quem vai competir com você.</p>
+      <div id="banner" role="alert" class="banner err" hidden></div>
+      <form id="form" novalidate>
+        <fieldset>
+          <legend>O desafio</legend>
+          <div class="field">
+            <label for="nome">Nome do grupo</label>
+            <input type="text" id="nome" name="nome" placeholder="Ex.: Corrida de 30 dias" autocomplete="off" aria-describedby="e-nome" required>
+            <p class="error" id="e-nome"></p>
+          </div>
+          <div class="field">
+            <label for="atividade">Atividade ou hábito</label>
+            <p class="hint" id="h-atividade">Descreva o que cada participante deve fazer.</p>
+            <textarea id="atividade" name="atividade" placeholder="Ex.: Correr pelo menos 3 km por dia" aria-describedby="h-atividade e-atividade" required></textarea>
+            <p class="error" id="e-atividade"></p>
+          </div>
+          <div class="field">
+            <label for="categoria">Categoria</label>
+            <select id="categoria" name="categoria" aria-describedby="e-categoria" required>
+              <option value="">Selecione uma categoria</option>
+            </select>
+            <p class="error" id="e-categoria"></p>
+          </div>
+          <div class="field">
+            <span class="lbl" id="l-dur">Duração do desafio</span>
+            <div class="row" role="group" aria-labelledby="l-dur">
+              <div>
+                <input type="number" id="durQtd" name="durQtd" min="1" step="1" inputmode="numeric" placeholder="Ex.: 30" aria-label="Quantidade" aria-describedby="e-dur">
+              </div>
+              <div>
+                <select id="durUn" name="durUn" aria-label="Unidade de tempo"><option value="dias">dias</option><option value="semanas">semanas</option><option value="meses">meses</option></select>
+              </div>
+            </div>
+            <p class="error" id="e-dur"></p>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Pontuação</legend>
+          <div class="field">
+            <label for="criterios">Critérios de pontuação</label>
+            <p class="hint" id="h-crit">Explique como o desempenho será contado.</p>
+            <textarea id="criterios" name="criterios" placeholder="Ex.: 1 ponto por dia cumprido; 2 pontos se passar de 5 km" aria-describedby="h-crit e-crit" required></textarea>
+            <p class="error" id="e-crit"></p>
+          </div>
+          <div class="field" id="quantBox" hidden>
+            <label for="quant">Forma de quantificação</label>
+            <p class="hint" id="h-quant">Como medir o progresso nesta categoria?</p>
+            <input type="text" id="quant" name="quant" placeholder="Ex.: páginas lidas, minutos, vezes por semana" autocomplete="off" aria-describedby="h-quant e-quant">
+            <p class="error" id="e-quant"></p>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Quem pode participar</legend>
+          <div class="vis" role="radiogroup" aria-label="Visibilidade do grupo">
+            <label><input type="radio" name="visib" value="publico" checked><span class="card"><b>Público</b><small>Qualquer usuário da plataforma pode encontrar o grupo.</small></span></label>
+            <label><input type="radio" name="visib" value="privado"><span class="card"><b>Privado</b><small>Só entra quem for convidado ou tiver a entrada aprovada.</small></span></label>
+          </div>
+          <div class="field">
+            <label for="limite">Limite de participantes <span class="opt">(opcional)</span></label>
+            <p class="hint" id="h-lim">Deixe em branco para não limitar. Ao atingir o limite, novos ingressos são bloqueados.</p>
+            <input type="number" id="limite" name="limite" min="1" step="1" inputmode="numeric" placeholder="Ex.: 10" aria-describedby="h-lim e-lim">
+            <p class="error" id="e-lim"></p>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>Premiação <span class="opt" style="font-weight:400">(opcional)</span></legend>
+          <div class="field">
+            <label for="premio">Descrição da premiação</label>
+            <textarea id="premio" name="premio" placeholder="Ex.: Quem ficar em 1º lugar escolhe o restaurante da comemoração"></textarea>
+          </div>
+        </fieldset>
+
+        <div class="actions">
+          <button type="button" class="secondary" id="cancelar">Cancelar</button>
+          <button type="submit" class="primary" id="enviar">Criar grupo</button>
+        </div>
+      </form>
+      <p class="banner info" style="margin-top:1.25rem">Protótipo: a criação é simulada e nada é salvo. Para testar o erro de servidor, abra esta página com <code>#simular-erro</code> no endereço.</p>
+    </section>
+
+    <section id="okView" class="success" hidden aria-live="polite" tabindex="-1">
+      <h2>Grupo criado!</h2>
+      <p>Seu grupo já está pronto para receber participantes.</p>
+      <dl id="resumo"></dl>
+      <div class="actions" style="justify-content:flex-start">
+        <button type="button" class="secondary" id="editar">Editar dados</button>
+        <button type="button" class="primary" id="novo">Criar outro grupo</button>
+      </div>
+    </section>
+  </main>
+</div>
+
+<script>
+/* ============ 1. Configuração (pendente de confirmação com o time) ============ */
+// Categorias: lista provisória. Confirmar a lista oficial; "Outro" é obrigatória (RN-001).
+const CATEGORIAS = ["Exercício físico","Estudos","Alimentação","Leitura","Bem-estar","Outro"];
+const CATEGORIA_OUTRO = "Outro";
+
+/* ============ 2. Validação (somente o que o front pode verificar) ============ */
+function validar(d){
+  const e = {};
+  if(!d.nome.trim()) e.nome = "Informe o nome do grupo.";
+  if(!d.atividade.trim()) e.atividade = "Descreva a atividade ou o hábito do desafio.";
+  if(!d.categoria) e.categoria = "Selecione uma categoria.";
+  const q = Number(d.durQtd);
+  if(d.durQtd === "") e.dur = "Informe a duração do desafio.";
+  else if(!Number.isInteger(q) || q < 1) e.dur = "Use um número inteiro maior que zero.";
+  if(!d.criterios.trim()) e.crit = "Descreva os critérios de pontuação.";
+  if(d.categoria === CATEGORIA_OUTRO && !d.quant.trim()) e.quant = "Informe como o progresso será medido (ex.: páginas lidas).";
+  if(d.limite !== ""){ const l = Number(d.limite); if(!Number.isInteger(l) || l < 1) e.lim = "Use um número inteiro maior que zero ou deixe em branco."; }
+  return e;
+}
+
+/* ============ 3. Serviço (simulado) — trocar por chamada à API ============ */
+// A pessoa responsável pelo back-end precisa definir: endpoint, método, corpo, formato de erros
+// por campo e tratamento de sessão expirada (RN-010). Nada disso foi assumido aqui.
+const grupoService = {
+  async criar(payload){
+    await new Promise(r => setTimeout(r, 900));
+    if(location.hash === "#simular-erro") throw new Error("Não foi possível criar o grupo agora. Seus dados foram mantidos; tente novamente.");
+    return { id: "simulado-" + Date.now(), ...payload };
+  }
+};
+
+/* ============ 4. Interface ============ */
+const $ = id => document.getElementById(id);
+const form = $("form"), banner = $("banner");
+const campos = {nome:"nome",atividade:"atividade",categoria:"categoria",dur:"durQtd",crit:"criterios",quant:"quant",lim:"limite"};
+
+CATEGORIAS.forEach(c => $("categoria").append(new Option(c, c)));
+
+function ler(){
+  const f = new FormData(form);
+  return Object.fromEntries(["nome","atividade","categoria","durQtd","durUn","criterios","quant","visib","limite","premio"].map(k => [k, String(f.get(k) ?? "")]));
+}
+function mostrarErros(e){
+  Object.entries(campos).forEach(([k, id]) => {
+    const el = $(id), msg = $("e-" + k);
+    if(!el || !msg) return;
+    msg.textContent = e[k] || "";
+    el.toggleAttribute("aria-invalid", !!e[k]);
+    if(e[k]) el.setAttribute("aria-invalid","true"); else el.removeAttribute("aria-invalid");
+  });
+}
+function limparCampo(k){ const m=$("e-"+k); if(m){m.textContent="";} const el=$(campos[k]); if(el) el.removeAttribute("aria-invalid"); }
+function aviso(msg){ banner.textContent = msg||""; banner.hidden = !msg; }
+
+$("categoria").addEventListener("change", () => {
+  const outro = $("categoria").value === CATEGORIA_OUTRO;
+  $("quantBox").hidden = !outro;
+  $("quant").required = outro;
+  if(!outro) limparCampo("quant");
+});
+// Corrige só o campo editado, sem apagar o restante
+Object.entries(campos).forEach(([k,id]) => $(id).addEventListener("input", () => limparCampo(k)));
+$("categoria").addEventListener("change", () => limparCampo("categoria"));
+
+form.addEventListener("submit", async ev => {
+  ev.preventDefault();
+  aviso("");
+  const dados = ler(), erros = validar(dados);
+  mostrarErros(erros);
+  const primeiro = Object.keys(erros)[0];
+  if(primeiro){ aviso("Revise os campos destacados antes de criar o grupo."); $(campos[primeiro]).focus(); return; }
+  const btn = $("enviar");
+  btn.disabled = true; btn.innerHTML = '<span class="spin" aria-hidden="true"></span>Criando…';
+  try{
+    const payload = {
+      nome: dados.nome.trim(), atividade: dados.atividade.trim(), categoria: dados.categoria,
+      duracao: { quantidade: Number(dados.durQtd), unidade: dados.durUn },
+      criteriosPontuacao: dados.criterios.trim(),
+      formaQuantificacao: dados.categoria === CATEGORIA_OUTRO ? dados.quant.trim() : null,
+      visibilidade: dados.visib,
+      limiteParticipantes: dados.limite === "" ? null : Number(dados.limite),
+      premiacao: dados.premio.trim() || null
+    };
+    const g = await grupoService.criar(payload);
+    mostrarSucesso(g);
+  }catch(err){
+    aviso(err.message || "Algo deu errado. Tente novamente.");
+    banner.scrollIntoView({block:"center"});
+  }finally{
+    btn.disabled = false; btn.textContent = "Criar grupo";
+  }
+});
+
+function mostrarSucesso(g){
+  const linhas = [
+    ["Nome", g.nome], ["Hábito", g.atividade], ["Categoria", g.categoria],
+    ["Duração", g.duracao.quantidade + " " + g.duracao.unidade],
+    ["Pontuação", g.criteriosPontuacao],
+    ...(g.formaQuantificacao ? [["Quantificação", g.formaQuantificacao]] : []),
+    ["Visibilidade", g.visibilidade === "publico" ? "Público" : "Privado"],
+    ["Limite", g.limiteParticipantes ?? "Sem limite"],
+    ...(g.premiacao ? [["Premiação", g.premiacao]] : [])
+  ];
+  const dl = $("resumo"); dl.replaceChildren();
+  linhas.forEach(([t,v]) => { const a=document.createElement("dt"); a.textContent=t; const b=document.createElement("dd"); b.textContent=v; dl.append(a,b); });
+  $("formView").hidden = true; $("okView").hidden = false; $("okView").focus();
+}
+$("editar").addEventListener("click", () => { $("okView").hidden = true; $("formView").hidden = false; $("nome").focus(); });
+$("novo").addEventListener("click", () => { form.reset(); $("quantBox").hidden = true; mostrarErros({}); aviso(""); $("okView").hidden = true; $("formView").hidden = false; $("nome").focus(); });
+// Voltar: o destino depende da navegação do projeto (ainda não definida)
+$("cancelar").addEventListener("click", () => { if(history.length > 1) history.back(); else aviso("Cancelado. Aqui o app voltaria para a tela anterior."); });
+</script>
+</body>
+</html>
