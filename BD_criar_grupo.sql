@@ -1,6 +1,5 @@
 -- =====================================================================
 -- Who Wins · Banco de dados da tela "Criar grupo de desafio"
--- SGBD: PostgreSQL 13+
 --
 -- Fontes: diagrama de classes, protótipo da tela e UC "Criar grupo".
 -- Escopo: apenas as entidades que a criação do grupo lê ou grava.
