@@ -167,9 +167,7 @@ button{font:600 1rem var(--body);min-height:2.9rem;padding:.6rem 1.3rem;border-r
 </div>
 
 <script>
-/* ============ 1. Configuração (pendente de confirmação com o time) ============ */
-// Categorias: lista provisória. Confirmar a lista oficial; "Outro" é obrigatória (RN-001).
-const CATEGORIAS = ["Exercício físico","Estudos","Alimentação","Leitura","Bem-estar","Outro"];
+/* ============ 1. Configuração ============ */
 const CATEGORIA_OUTRO = "Outro";
 
 /* ============ 2. Validação (somente o que o front pode verificar) ============ */
@@ -187,14 +185,31 @@ function validar(d){
   return e;
 }
 
-/* ============ 3. Serviço (simulado) — trocar por chamada à API ============ */
-// A pessoa responsável pelo back-end precisa definir: endpoint, método, corpo, formato de erros
-// por campo e tratamento de sessão expirada (RN-010). Nada disso foi assumido aqui.
+/* ============ 3. Serviço ============ */
+async function requisicaoAPI(url, opcoes = {}){
+  const resposta = await fetch(url, {
+    ...opcoes,
+    headers: { "Content-Type": "application/json", ...(opcoes.headers || {}) }
+  });
+  const corpo = await resposta.json().catch(() => ({}));
+  if(!resposta.ok) throw new Error(corpo.erro || "Não foi possível comunicar com o servidor.");
+  return corpo;
+}
 const grupoService = {
+  async listarCategorias(){
+    return requisicaoAPI("/api/categorias");
+  },
   async criar(payload){
-    await new Promise(r => setTimeout(r, 900));
-    if(location.hash === "#simular-erro") throw new Error("Não foi possível criar o grupo agora. Seus dados foram mantidos; tente novamente.");
-    return { id: "simulado-" + Date.now(), ...payload };
+    return requisicaoAPI("/api/grupos", {
+      method: "POST",
+      body: JSON.stringify(payload)
+    });
+  },
+  async atualizar(id, payload){
+    return requisicaoAPI(`/api/grupos/${encodeURIComponent(id)}`, {
+      method: "PUT",
+      body: JSON.stringify(payload)
+    });
   }
 };
 
@@ -202,8 +217,20 @@ const grupoService = {
 const $ = id => document.getElementById(id);
 const form = $("form"), banner = $("banner");
 const campos = {nome:"nome",atividade:"atividade",categoria:"categoria",dur:"durQtd",crit:"criterios",quant:"quant",lim:"limite"};
+let grupoAtual = null;
+let grupoEmEdicaoId = null;
 
-CATEGORIAS.forEach(c => $("categoria").append(new Option(c, c)));
+async function carregarCategorias(){
+  try{
+    const categorias = await grupoService.listarCategorias();
+    categorias.forEach(c => $("categoria").append(new Option(c.nome, c.nome)));
+  }catch(err){
+    aviso("Não foi possível carregar as categorias. Verifique a conexão com o servidor e o banco.");
+    $("enviar").disabled = true;
+    console.error("Erro ao carregar categorias:", err);
+  }
+}
+carregarCategorias();
 
 function ler(){
   const f = new FormData(form);
@@ -239,7 +266,9 @@ form.addEventListener("submit", async ev => {
   const primeiro = Object.keys(erros)[0];
   if(primeiro){ aviso("Revise os campos destacados antes de criar o grupo."); $(campos[primeiro]).focus(); return; }
   const btn = $("enviar");
-  btn.disabled = true; btn.innerHTML = '<span class="spin" aria-hidden="true"></span>Criando…';
+  const editando = grupoEmEdicaoId !== null;
+  btn.disabled = true;
+  btn.innerHTML = `<span class="spin" aria-hidden="true"></span>${editando ? "Salvando…" : "Criando…"}`;
   try{
     const payload = {
       nome: dados.nome.trim(), atividade: dados.atividade.trim(), categoria: dados.categoria,
@@ -250,17 +279,20 @@ form.addEventListener("submit", async ev => {
       limiteParticipantes: dados.limite === "" ? null : Number(dados.limite),
       premiacao: dados.premio.trim() || null
     };
-    const g = await grupoService.criar(payload);
-    mostrarSucesso(g);
+    const g = editando
+      ? await grupoService.atualizar(grupoEmEdicaoId, payload)
+      : await grupoService.criar(payload);
+    mostrarSucesso(g, editando);
   }catch(err){
     aviso(err.message || "Algo deu errado. Tente novamente.");
     banner.scrollIntoView({block:"center"});
   }finally{
-    btn.disabled = false; btn.textContent = "Criar grupo";
+    btn.disabled = false; btn.textContent = grupoEmEdicaoId === null ? "Criar grupo" : "Salvar alterações";
   }
 });
 
-function mostrarSucesso(g){
+function mostrarSucesso(g, editado = false){
+  grupoAtual = g;
   const linhas = [
     ["Nome", g.nome], ["Hábito", g.atividade], ["Categoria", g.categoria],
     ["Duração", g.duracao.quantidade + " " + g.duracao.unidade],
@@ -272,10 +304,41 @@ function mostrarSucesso(g){
   ];
   const dl = $("resumo"); dl.replaceChildren();
   linhas.forEach(([t,v]) => { const a=document.createElement("dt"); a.textContent=t; const b=document.createElement("dd"); b.textContent=v; dl.append(a,b); });
+  $("okView").querySelector("h2").textContent = editado ? "Grupo atualizado!" : "Grupo criado!";
+  $("okView").querySelector("p").textContent = editado
+    ? "As alterações foram salvas no grupo."
+    : "Seu grupo já está pronto para receber participantes.";
   $("formView").hidden = true; $("okView").hidden = false; $("okView").focus();
 }
-$("editar").addEventListener("click", () => { $("okView").hidden = true; $("formView").hidden = false; $("nome").focus(); });
-$("novo").addEventListener("click", () => { form.reset(); $("quantBox").hidden = true; mostrarErros({}); aviso(""); $("okView").hidden = true; $("formView").hidden = false; $("nome").focus(); });
+$("editar").addEventListener("click", () => {
+  if(!grupoAtual) return;
+  grupoEmEdicaoId = grupoAtual.id;
+  $("nome").value = grupoAtual.nome;
+  $("atividade").value = grupoAtual.atividade;
+  $("categoria").value = grupoAtual.categoria;
+  $("durQtd").value = grupoAtual.duracao.quantidade;
+  $("durUn").value = grupoAtual.duracao.unidade;
+  $("criterios").value = grupoAtual.criteriosPontuacao;
+  $("quant").value = grupoAtual.formaQuantificacao || "";
+  $("quantBox").hidden = $("categoria").value !== CATEGORIA_OUTRO;
+  $("quant").required = !$("quantBox").hidden;
+  document.querySelector(`input[name="visib"][value="${grupoAtual.visibilidade}"]`).checked = true;
+  $("limite").value = grupoAtual.limiteParticipantes ?? "";
+  $("premio").value = grupoAtual.premiacao || "";
+  $("enviar").textContent = "Salvar alterações";
+  $("okView").hidden = true; $("formView").hidden = false; $("nome").focus();
+});
+$("novo").addEventListener("click", () => {
+  grupoAtual = null;
+  grupoEmEdicaoId = null;
+  form.reset();
+  $("enviar").textContent = "Criar grupo";
+  $("quantBox").hidden = true;
+  $("quant").required = false;
+  mostrarErros({});
+  aviso("");
+  $("okView").hidden = true; $("formView").hidden = false; $("nome").focus();
+});
 // Voltar: o destino depende da navegação do projeto (ainda não definida)
 $("cancelar").addEventListener("click", () => { if(history.length > 1) history.back(); else aviso("Cancelado. Aqui o app voltaria para a tela anterior."); });
 </script>
