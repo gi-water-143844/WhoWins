@@ -18,20 +18,24 @@ Integração da tela de grupos à API Node.js/Express e ao PostgreSQL. O Supabas
 - PostgreSQL 13 ou superior, local ou no Supabase
 - npm
 
-### 1. Criar o banco
-No PostgreSQL, crie o banco:
+### 1. Preparar o banco
+
+O arquivo `sql/BD_criar_grupo.sql` cria as tabelas, tipos e funções da funcionalidade no banco ao qual você estiver conectado. Ele não cria um banco PostgreSQL; primeiro escolha ou crie o banco e depois execute os scripts nele, nesta ordem:
+
+1. `sql/BD_criar_grupo.sql`
+2. `sql/seed_demo.sql`
+
+Execute `BD_criar_grupo.sql` apenas uma vez em cada banco. O segundo arquivo adiciona o usuário de demonstração.
+
+#### PostgreSQL local
+
+Crie o banco local:
 
 ```sql
 CREATE DATABASE who_wins;
 ```
 
-Conecte-se ao banco e execute, nesta ordem:
-1. `sql/BD_criar_grupo.sql`
-2. `sql/seed_demo.sql`
-
-O primeiro arquivo cria as tabelas e a função SQL usadas pela tela. O segundo cria um usuário fictício, pois a tela ainda não contém cadastro ou login. Execute o script de criação uma única vez no banco escolhido.
-
-Exemplo usando terminal:
+Depois conecte-se ao banco `who_wins` e execute os dois scripts. Pelo terminal, a partir da pasta `WhoWins`:
 
 ```bash
 createdb -U postgres who_wins
@@ -39,7 +43,11 @@ psql -U postgres -d who_wins -f sql/BD_criar_grupo.sql
 psql -U postgres -d who_wins -f sql/seed_demo.sql
 ```
 
-Para o Supabase, selecione o banco `postgres` no painel SQL Editor e execute os arquivos `sql/BD_criar_grupo.sql` e `sql/seed_demo.sql`. Se o comando `createdb` não estiver disponível localmente, crie o banco pelo pgAdmin e execute os arquivos no Query Tool.
+Se `createdb` não estiver disponível, crie `who_wins` pelo pgAdmin, conecte-se a ele e execute os arquivos no Query Tool.
+
+#### Supabase
+
+O projeto Supabase já fornece o banco `postgres`; não é necessário nem apropriado executar `CREATE DATABASE who_wins` no SQL Editor. No painel **SQL Editor**, conectado ao banco `postgres`, execute primeiro o conteúdo de `sql/BD_criar_grupo.sql` e depois o de `sql/seed_demo.sql`. Configure `DATABASE_URL` para conectar ao mesmo banco `postgres`.
 
 ### 2. Configurar o backend
 
